@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sine Function Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            justify-content: space-around;
+            width: 900px;
+            margin-bottom: 20px;
+        }
+        canvas {
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 0 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sine Function Visualization</h1>
+    <div class="container">
+        <canvas id="unitCircle" width="400" height="400"></canvas>
+        <canvas id="sineWave" width="400" height="400"></canvas>
+    </div>
+    <div class="controls">
+        <button id="startBtn">Start Animation</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="resetBtn">Reset</button>
+    </div>
+
+    <script>
+        // Get canvas elements and contexts
+        const unitCircleCanvas = document.getElementById('unitCircle');
+        const sineWaveCanvas = document.getElementById('sineWave');
+        const unitCircleCtx = unitCircleCanvas.getContext('2d');
+        const sineWaveCtx = sineWaveCanvas.getContext('2d');
+        
+        // Animation control variables
+        let angle = 0;
+        let animationId = null;
+        let isPlaying = false;
+        let time = 0;
+        const speed = 0.02;
+        const points = [];
+        
+        // Set up unit circle canvas
+        function setupUnitCircle() {
+            unitCircleCtx.clearRect(0, 0, unitCircleCanvas.width, unitCircleCanvas.height);
+            
+            // Draw axes
+            unitCircleCtx.strokeStyle = '#aaa';
+            unitCircleCtx.lineWidth = 1;
+            unitCircleCtx.beginPath();
+            unitCircleCtx.moveTo(200, 0);
+            unitCircleCtx.lineTo(200, 400);
+            unitCircleCtx.moveTo(0, 200);
+            unitCircleCtx.lineTo(400, 200);
+            unitCircleCtx.stroke();
+            
+            // Draw unit circle
+            unitCircleCtx.beginPath();
+            unitCircleCtx.strokeStyle = '#333';
+            unitCircleCtx.lineWidth = 2;
+            unitCircleCtx.arc(200, 200, 150, 0, 2 * Math.PI);
+            unitCircleCtx.stroke();
+            
+            // Draw angle line
+            const x = 200 + 150 * Math.cos(angle);
+            const y = 200 - 150 * Math.sin(angle);
+            
+            unitCircleCtx.beginPath();
+            unitCircleCtx.strokeStyle = '#4CAF50';
+            unitCircleCtx.lineWidth = 2;
+            unitCircleCtx.moveTo(200, 200);
+            unitCircleCtx.lineTo(x, y);
+            unitCircleCtx.stroke();
+            
+            // Draw sine line
+            unitCircleCtx.beginPath();
+            unitCircleCtx.strokeStyle = '#FF5722';
+            unitCircleCtx.setLineDash([5, 5]);
+            unitCircleCtx.moveTo(x, y);
+            unitCircleCtx.lineTo(x, 200);
+            unitCircleCtx.stroke();
+            unitCircleCtx.setLineDash([]);
+            
+            // Draw angle
+            unitCircleCtx.beginPath();
+            unitCircleCtx.strokeStyle = '#2196F3';
+            unitCircleCtx.lineWidth = 1;
+            unitCircleCtx.arc(200, 200, 30, 0, angle);
+            unitCircleCtx.stroke();
+            
+            // Draw labels
+            unitCircleCtx.font = '14px Arial';
+            unitCircleCtx.fillStyle = '#333';
+            unitCircleCtx.fillText('cos(θ)', 200 + 80 * Math.cos(angle), 210);
+            unitCircleCtx.fillText('sin(θ)', x + 5, (y + 200) / 2);
+            unitCircleCtx.fillText('θ', 220, 180);
+            
+            // Draw point at end of sine line
+            unitCircleCtx.beginPath();
+            unitCircleCtx.fillStyle = '#FF5722';
+            unitCircleCtx.arc(x, y, 5, 0, 2 * Math.PI);
+            unitCircleCtx.fill();
+        }
+        
+        // Set up sine wave canvas
+        function setupSineWave() {
+            sineWaveCtx.clearRect(0, 0, sineWaveCanvas.width, sineWaveCanvas.height);
+            
+            // Draw axes
+            sineWaveCtx.strokeStyle = '#aaa';
+            sineWaveCtx.lineWidth = 1;
+            sineWaveCtx.beginPath();
+            sineWaveCtx.moveTo(50, 200);
+            sineWaveCtx.lineTo(350, 200);
+            sineWaveCtx.moveTo(50, 50);
+            sineWaveCtx.lineTo(50, 350);
+            sineWaveCtx.stroke();
+            
+            // Draw sine wave
+            sineWaveCtx.beginPath();
+            sineWaveCtx.strokeStyle = '#FF5722';
+            sineWaveCtx.lineWidth = 2;
+            
+            for (let i = 0; i < points.length; i++) {
+                const x = 50 + i;
+                const y = 200 - 100 * points[i];
+                
+                if (i === 0) {
+                    sineWaveCtx.moveTo(x, y);
+                } else {
+                    sineWaveCtx.lineTo(x, y);
+                }
+            }
+            sineWaveCtx.stroke();
+            
+            // Draw current point
+            if (points.length > 0) {
+                const currentX = 50 + points.length - 1;
+                const currentY = 200 - 100 * points[points.length - 1];
+                
+                sineWaveCtx.beginPath();
+                sineWaveCtx.fillStyle = '#FF5722';
+                sineWaveCtx.arc(currentX, currentY, 5, 0, 2 * Math.PI);
+                sineWaveCtx.fill();
+                
+                // Draw connecting line
+                sineWaveCtx.beginPath();
+                sineWaveCtx.strokeStyle = '#4CAF50';
+                sineWaveCtx.setLineDash([5, 5]);
+                sineWaveCtx.moveTo(currentX, currentY);
+                sineWaveCtx.lineTo(currentX, 200);
+                sineWaveCtx.stroke();
+                sineWaveCtx.setLineDash([]);
+            }
+            
+            // Draw labels
+            sineWaveCtx.font = '14px Arial';
+            sineWaveCtx.fillStyle = '#333';
+            sineWaveCtx.fillText('sin(θ)', 60, 40);
+            sineWaveCtx.fillText('θ', 340, 220);
+        }
+        
+        // Animation loop
+        function animate() {
+            angle += speed;
+            time += speed;
+            
+            // Keep angle between 0 and 2π
+            if (angle > 2 * Math.PI) {
+                angle -= 2 * Math.PI;
+            }
+            
+            // Add new point to sine wave (but limit number of points)
+            points.push(Math.sin(angle));
+            if (points.length > 300) {
+                points.shift();
+            }
+            
+            setupUnitCircle();
+            setupSineWave();
+            
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        // Event listeners for buttons
+        document.getElementById('startBtn').addEventListener('click', function() {
+            if (!isPlaying) {
+                isPlaying = true;
+                animate();
+            }
+        });
+        
+        document.getElementById('pauseBtn').addEventListener('click', function() {
+            if (isPlaying) {
+                isPlaying = false;
+                cancelAnimationFrame(animationId);
+            }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            isPlaying = false;
+            cancelAnimationFrame(animationId);
+            angle = 0;
+            time = 0;
+            points.length = 0;
+            setupUnitCircle();
+            setupSineWave();
+        });
+        
+        // Initial setup
+        setupUnitCircle();
+        setupSineWave();
+    </script>
+</body>
+</html>
