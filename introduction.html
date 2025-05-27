@@ -5,42 +5,186 @@
 <title>Virtual Teacher Animation</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-body{margin:0;overflow:hidden;background:#f0f8ff;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
-#scene{position:relative;width:100vw;height:60vh;}
-#character{position:absolute;bottom:50px;width:180px;height:250px;animation:walk 18s linear infinite;}
-@keyframes walk{
- 0%{transform:translateX(-200px);} 50%{transform:translateX(calc(100vw - 200px));} 100%{transform:translateX(-200px);} }
-#head{width:120px;height:120px;background:#4e9af1;border-radius:20px;position:absolute;top:0;left:30px;animation:headBob 3s ease-in-out infinite;}
-#eye-left,#eye-right{width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:40px;}
-#eye-left{left:25px;}
-#eye-right{right:25px;}
-#body{width:140px;height:90px;background:#6fb3ff;position:absolute;top:130px;left:20px;border-radius:10px;}
-#arm-left,#arm-right{width:20px;height:80px;background:#6fb3ff;position:absolute;top:140px;}
-#arm-left{left:-10px;transform-origin:top;animation:wave 2.5s ease-in-out infinite;}
-#arm-right{right:-10px;transform-origin:top;animation:wave 2.5s ease-in-out infinite 1.25s;}
-@keyframes wave{0%,100%{transform:rotate(0deg);}25%{transform:rotate(-35deg);}50%{transform:rotate(0deg);}75%{transform:rotate(35deg);}}
-@keyframes headBob{0%,100%{transform:translateY(0);}50%{transform:translateY(6px);}}
-#propImg{position:absolute;width:100px;bottom:240px;left:calc(50% - 50px);opacity:0;transition:opacity 0.5s;}
-#text{position:absolute;bottom:5vh;left:50%;transform:translateX(-50%);font-size:1.25rem;width:80%;max-width:700px;min-height:80px;text-align:center;}
-.cursor{display:inline-block;width:8px;background:#000;animation:blink 1s steps(1) infinite;}
+body {
+  margin:0; overflow:hidden; 
+  font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  background: linear-gradient(120deg, #e0f7fa 0%, #b2ebf2 50%, #f1f8e9 100%);
+}
+#bg-decor {
+  position: absolute; width:100vw; height:100%; top:0; left:0; pointer-events:none; z-index:0;
+}
+.bg-circle { position: absolute; border-radius: 50%; opacity: .15; z-index:1; }
+.bg-circle1 { width:340px;height:340px;top:8vh;left:5vw;background:#81d4fa;}
+.bg-circle2 { width:200px;height:200px;top:30vh;right:9vw;background:#a5d6a7;}
+.bg-circle3 { width:120px;height:120px;top:7vh;right:25vw;background:#fff176;}
+.bg-circle4 { width:100px;height:100px;top:41vh;left:16vw;background:#ffab91;}
+#scene {
+  position:relative;
+  width:100vw; height:64vh;
+  display:flex; align-items:center; justify-content:center;
+}
+#character-wrap {
+  position: absolute; left:50%; top:49%; transform:translate(-50%,-50%);
+  width:240px; height:270px; z-index:3; display:flex; align-items:center; justify-content:center;
+  transition:all .7s cubic-bezier(.5,1.5,.5,1);
+}
+#character {
+  width:190px; height:235px; 
+  transition:all .6s cubic-bezier(.44,1.5,.5,1);
+}
+#character.walk { animation:walk 18s linear infinite;}
+#character.run { animation:run 7s linear infinite;}
+#character.dance { animation:dance 2.5s linear infinite;}
+#character.lie { animation:none; transform:rotate(90deg) scale(0.7);}
+#character svg { width:100%; height:100%;}
+@keyframes walk {
+  0%{transform:translateX(-80px);}
+  50%{transform:translateX(80px);}
+  100%{transform:translateX(-80px);}
+}
+@keyframes run {
+  0%{transform:translateX(-120px);}
+  50%{transform:translateX(120px);}
+  100%{transform:translateX(-120px);}
+}
+@keyframes dance {
+  0%,100%{transform:rotate(0);}
+  10%{transform:rotate(-12deg);}
+  20%{transform:rotate(13deg);}
+  30%{transform:rotate(-17deg);}
+  40%{transform:rotate(15deg);}
+  50%{transform:rotate(-10deg);}
+  60%{transform:rotate(14deg);}
+  70%{transform:rotate(-8deg);}
+  80%{transform:rotate(10deg);}
+  90%{transform:rotate(0);}
+}
+#character.lie {animation:none;}
+#character-wrap.lie {
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%,0) scale(0.68);
+}
+#text-container {
+  position:fixed;
+  left:50%; bottom:10vh; transform:translateX(-50%);
+  display: flex; flex-direction:row; align-items: flex-start;
+  z-index:6;
+  width:90vw; max-width:950px;
+  justify-content:center;
+}
+#text {
+  font-size:2.1rem; color:#223; min-width:270px; max-width:650px; min-height:90px;
+  text-align:center; font-weight:500; background:rgba(255,255,255,0.88); border-radius:24px;
+  padding:19px 18px; box-shadow:0 4px 16px #9992; pointer-events:none; flex: 1;
+  transition:.2s;
+}
+#propImg{
+  display:block;
+  width:84px; height:84px; margin-left:18px; margin-top:10px;
+  opacity:0;transition:opacity 0.4s;
+  border-radius:18px;box-shadow:0 8px 24px #0002; background:#fff;
+  object-fit:contain;
+  z-index:7;
+}
+.cursor{display:inline-block;width:14px;background:#333;animation:blink 1s steps(1) infinite;}
 @keyframes blink{0%,50%{opacity:1;}50.01%,100%{opacity:0;}}
+#controls{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:20;
+  display:flex;justify-content:center;gap:24px;
+}
+#motionBtns{
+  position:fixed;top:50%;right:18px;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:18px;z-index:12;
+}
+button{
+  font-size:1.15rem;padding:10px 24px;border-radius:10px;
+  border:none;background:#3874f1;color:#fff;
+  margin:0 0 0 0;box-shadow:0 2px 8px #0001;cursor:pointer;transition:background 0.22s;
+  font-weight:600;
+}
+button:active{background:#2453a6;}
+button.selected{background:#0a277f;}
+@media (max-width:700px){
+  #text{font-size:1.1rem;min-height:50px;}
+  #motionBtns{right:2vw;}
+  #character,#character svg{width:100px;height:130px;}
+  #character-wrap{width:120px;height:145px;}
+  #propImg{width:46px;height:46px;}
+  #text-container{max-width:98vw;}
+}
 </style>
 </head>
 <body>
-<div id="scene">
- <div id="character">
-  <div id="head">
-   <div id="eye-left"></div>
-   <div id="eye-right"></div>
-  </div>
-  <div id="body"></div>
-  <div id="arm-left"></div>
-  <div id="arm-right"></div>
- </div>
- <img id="propImg" src="" alt="">
+<div id="bg-decor">
+  <div class="bg-circle bg-circle1"></div>
+  <div class="bg-circle bg-circle2"></div>
+  <div class="bg-circle bg-circle3"></div>
+  <div class="bg-circle bg-circle4"></div>
 </div>
-<div id="text"></div>
-
+<div id="scene">
+  <div id="character-wrap">
+    <div id="character" class="walk">
+      <!-- 生动可爱卡通机器人形象 SVG -->
+      <svg viewBox="0 0 200 235">
+        <ellipse cx="100" cy="208" rx="60" ry="22" fill="#b5e2f8" />
+        <g>
+          <!-- 身体 -->
+          <rect x="48" y="70" rx="30" ry="38" width="104" height="90" fill="#76d1fa" stroke="#2360a2" stroke-width="4"/>
+          <!-- 胳膊 -->
+          <rect x="30" y="100" width="20" height="70" rx="12" fill="#ffe082" stroke="#cc8a18" stroke-width="2"/>
+          <rect x="150" y="100" width="20" height="70" rx="12" fill="#ffe082" stroke="#cc8a18" stroke-width="2"/>
+          <!-- 手掌 -->
+          <ellipse cx="40" cy="175" rx="11" ry="7" fill="#ffab91"/>
+          <ellipse cx="160" cy="175" rx="11" ry="7" fill="#ffab91"/>
+          <!-- 头部 -->
+          <ellipse cx="100" cy="55" rx="53" ry="48" fill="#50b1f6" stroke="#2360a2" stroke-width="5"/>
+          <!-- 耳朵（听筒）-->
+          <ellipse cx="31" cy="56" rx="11" ry="17" fill="#90caf9"/>
+          <ellipse cx="169" cy="56" rx="11" ry="17" fill="#90caf9"/>
+          <!-- 眼睛外圈 -->
+          <ellipse cx="77" cy="48" rx="15" ry="15" fill="#fff"/>
+          <ellipse cx="123" cy="48" rx="15" ry="15" fill="#fff"/>
+          <!-- 眼睛内圈 -->
+          <ellipse cx="77" cy="51" rx="6.5" ry="7" fill="#3949ab"/>
+          <ellipse cx="123" cy="51" rx="6.5" ry="7" fill="#3949ab"/>
+          <!-- 亮点 -->
+          <ellipse cx="74" cy="48" rx="2" ry="2.6" fill="#fff"/>
+          <ellipse cx="120" cy="48" rx="2" ry="2.6" fill="#fff"/>
+          <!-- 腮红 -->
+          <ellipse cx="62" cy="68" rx="7" ry="4" fill="#ffd1dc"/>
+          <ellipse cx="138" cy="68" rx="7" ry="4" fill="#ffd1dc"/>
+          <!-- 嘴巴（微笑） -->
+          <path d="M82 76 Q100 92 118 76" stroke="#384d5c" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <!-- 眉毛 -->
+          <rect x="63" y="37" width="13" height="4" rx="2" fill="#263238" transform="rotate(-9 70 39)"/>
+          <rect x="124" y="37" width="13" height="4" rx="2" fill="#263238" transform="rotate(9 132 39)"/>
+        </g>
+        <!-- 腿 -->
+        <rect x="70" y="156" width="14" height="45" rx="7" fill="#90caf9" stroke="#217086" stroke-width="2"/>
+        <rect x="116" y="156" width="14" height="45" rx="7" fill="#90caf9" stroke="#217086" stroke-width="2"/>
+        <!-- 脚掌 -->
+        <ellipse cx="77" cy="204" rx="12" ry="7" fill="#ffa726"/>
+        <ellipse cx="123" cy="204" rx="12" ry="7" fill="#ffa726"/>
+      </svg>
+    </div>
+  </div>
+</div>
+<div id="text-container">
+  <div id="text"></div>
+  <img id="propImg" src="" alt="">
+</div>
+<div id="motionBtns">
+  <button id="walkBtn" class="selected">Walk</button>
+  <button id="runBtn">Run</button>
+  <button id="danceBtn">Dance</button>
+  <button id="lieBtn">Lie Down</button>
+</div>
+<div id="controls">
+  <button id="playBtn">Play</button>
+  <button id="pauseBtn">Pause</button>
+  <button id="restartBtn">Restart</button>
+</div>
 <script>
 const sentences=[
  "I want to be a secondary school teacher as I believe the job is both interesting and challenging.",
@@ -58,7 +202,6 @@ const sentences=[
  "Students become lost in content that is not relevant to the course.",
  "Therefore, I believe it is vital to use technology carefully and to set clear guidelines so that it promotes learning rather than hinders it."
 ];
-
 const funPics=[
  "https://cdn-icons-png.flaticon.com/512/201/201818.png",
  "https://cdn-icons-png.flaticon.com/512/3105/3105745.png",
@@ -67,67 +210,137 @@ const funPics=[
  "https://cdn-icons-png.flaticon.com/512/4228/4228674.png",
  "https://cdn-icons-png.flaticon.com/512/3004/3004989.png"
 ];
-
 const textEl=document.getElementById("text");
 const imgEl=document.getElementById("propImg");
+const playBtn=document.getElementById("playBtn");
+const pauseBtn=document.getElementById("pauseBtn");
+const restartBtn=document.getElementById("restartBtn");
+const walkBtn=document.getElementById("walkBtn");
+const runBtn=document.getElementById("runBtn");
+const danceBtn=document.getElementById("danceBtn");
+const lieBtn=document.getElementById("lieBtn");
+const character=document.getElementById("character");
+const characterWrap=document.getElementById("character-wrap");
+const motionBtns=[walkBtn,runBtn,danceBtn,lieBtn];
 
-function typeSentence(sentence,element,delay=40){
- return new Promise(resolve=>{
-  element.textContent="";
-  let i=0;
-  const int=setInterval(()=>{
-   element.textContent=sentence.slice(0,++i);
-   if(i===sentence.length){
-    clearInterval(int);
-    const cursor=document.createElement("span");
-    cursor.className="cursor";
-    element.appendChild(cursor);
-    resolve();
-   }
-  },delay);
- });
+let current=0, stopped=false, typing=false, paused=false, typeInt=null, synth=window.speechSynthesis, utter=null;
+
+function setMotion(state){
+  character.className = state;
+  characterWrap.className = (state==='lie' ? 'lie' : '');
+  motionBtns.forEach(btn => btn.classList.remove("selected"));
+  if(state==='walk') walkBtn.classList.add("selected");
+  if(state==='run') runBtn.classList.add("selected");
+  if(state==='dance') danceBtn.classList.add("selected");
+  if(state==='lie') lieBtn.classList.add("selected");
+  // 躺下时停在最终帧，位置到顶部
+  if(state==='lie'){
+    setTimeout(()=>character.style.animationPlayState='paused',900);
+  }else{
+    character.style.animationPlayState='running';
+  }
 }
+walkBtn.onclick=()=>setMotion('walk');
+runBtn.onclick=()=>setMotion('run');
+danceBtn.onclick=()=>setMotion('dance');
+lieBtn.onclick=()=>setMotion('lie');
 
-function speakSentence(sentence){
- return new Promise(resolve=>{
-  const utter=new SpeechSynthesisUtterance(sentence);
-  utter.rate=1;
-  utter.pitch=1;
-  const voices=speechSynthesis.getVoices();
-  const maleYouth=voices.find(v=>{
-    const n=v.name?v.name.toLowerCase():"";
-    return (n.includes("teen")||n.includes("young")) && v.lang.startsWith("en") && (!v.gender||v.gender.toLowerCase()==="male");
+function typeSentence(sentence, element, delay=33) {
+  typing = true;
+  return new Promise(resolve => {
+    element.textContent = "";
+    let i = 0;
+    if(typeInt) clearInterval(typeInt);
+    typeInt = setInterval(()=>{
+      if (paused) return;
+      element.textContent = sentence.slice(0, ++i);
+      if(i === sentence.length) {
+        clearInterval(typeInt);
+        const cursor = document.createElement("span");
+        cursor.className = "cursor";
+        element.appendChild(cursor);
+        typing = false;
+        resolve();
+      }
+    }, delay);
   });
-  const genericMale=voices.find(v=>v.lang.startsWith("en") && (!v.gender||v.gender.toLowerCase()==="male"));
-  utter.voice=maleYouth||genericMale||voices[0];
-  utter.onend=resolve;
-  speechSynthesis.speak(utter);
- });
 }
-
+function speakSentence(sentence){
+  return new Promise(resolve => {
+    if(utter) synth.cancel();
+    utter = new SpeechSynthesisUtterance(sentence);
+    utter.rate=1; utter.pitch=1;
+    const voices=synth.getVoices();
+    const maleYouth=voices.find(v=>{
+      const n=v.name?v.name.toLowerCase():"";
+      return (n.includes("teen")||n.includes("young"))&&v.lang.startsWith("en")&&(!v.gender||v.gender.toLowerCase()==="male");
+    });
+    const genericMale=voices.find(v=>v.lang.startsWith("en")&&(!v.gender||v.gender.toLowerCase()==="male"));
+    utter.voice=maleYouth||genericMale||voices[0];
+    utter.onend=()=>resolve();
+    synth.speak(utter);
+  });
+}
 function showImage(index){
- imgEl.src=funPics[index%funPics.length];
- imgEl.style.opacity=1;
- setTimeout(()=>imgEl.style.opacity=0,2500);
+  imgEl.src=funPics[index%funPics.length];
+  imgEl.style.opacity=1;
+  setTimeout(()=>{imgEl.style.opacity=0},1700);
 }
-
-async function playScript(){
- for(let i=0;i<sentences.length;i++){
-  showImage(i);
-  await Promise.all([typeSentence(sentences[i],textEl),speakSentence(sentences[i])]);
-  await new Promise(r=>setTimeout(r,500));
- }
+async function playScript(from=current) {
+  stopped = false; paused = false;
+  for(let i=from;i<sentences.length;i++){
+    if(stopped) break;
+    current = i;
+    showImage(i);
+    await Promise.all([typeSentence(sentences[i], textEl), speakSentence(sentences[i])]);
+    await new Promise(r=>setTimeout(r,330));
+    if(stopped) break;
+    while(paused) await new Promise(r=>setTimeout(r,100));
+  }
 }
-
-function start(){
- if(speechSynthesis.getVoices().length){
-  playScript();
- }else{
-  speechSynthesis.addEventListener("voiceschanged",playScript,{once:true});
- }
+function pauseScript(){
+  paused = true;
+  synth.pause();
+  character.style.animationPlayState='paused';
 }
-
-window.addEventListener("load",()=>{start();document.body.addEventListener("click",()=>{speechSynthesis.cancel();start();});});
+function resumeScript(){
+  paused = false;
+  synth.resume();
+  character.style.animationPlayState='';
+  if(!typing){
+    playScript(current+1);
+  }
+}
+function restartScript(){
+  stopped=true; paused=false; current=0;
+  synth.cancel();
+  textEl.textContent='';
+  imgEl.style.opacity=0;
+  setMotion('walk');
+  character.style.animationPlayState='';
+  setTimeout(()=>{playScript(0)},200);
+}
+playBtn.onclick=()=>{
+  if(paused){
+    resumeScript();
+  }else if(current>=sentences.length-1||textEl.textContent===''){
+    restartScript();
+  }
+};
+pauseBtn.onclick=()=>{
+  pauseScript();
+};
+restartBtn.onclick=()=>{
+  restartScript();
+};
+function init(){
+  if(synth.getVoices().length){
+    restartScript();
+  }else{
+    synth.addEventListener("voiceschanged", ()=>{restartScript();},{once:true});
+  }
+}
+window.addEventListener("load", init);
 </script>
 </body>
 </html>
